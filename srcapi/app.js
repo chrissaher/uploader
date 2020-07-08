@@ -5,6 +5,12 @@ const router = express.Router();
 const app = express();
 var datetime = new Date();
 
+
+// Parse URL-encoded bodies (as sent by HTML forms)
+app.use(express.urlencoded());
+// Parse JSON bodies (as sent by API clients)
+app.use(express.json());
+
 app.set('port', process.env.PORT || 3000);
 
 mongoose.connect('mongodb+srv://ayudinadm:REolfqEvHV8D3toF@ayudinfiles.pjgqg.mongodb.net/dbfiles?retryWrites=true&w=majority')
@@ -12,6 +18,9 @@ mongoose.connect('mongodb+srv://ayudinadm:REolfqEvHV8D3toF@ayudinfiles.pjgqg.mon
 	.catch(err => console.log(err));
 
 const fileprueba = require('./models/fileup');
+
+// add reference to filemetadata
+const filemetadata = require('./dbconn/file_metadata.js')
 
 
 app.get('/', (req, res) => {
@@ -36,6 +45,23 @@ app.post('/do-upload',  (req, res) => {
 
   res.send("Files Uploaded")
 })
+
+app.post('/createFile', (req, res) => {
+	// parse data from form
+	let hashId = req.body.hashId
+	let fileName = req.body.fileName
+	let additionalMetadata = req.body.additionalMetadata || ''
+
+	// apply validation on data if necessary
+
+	// try insert into db
+	var values = filemetadata.create(hashId, fileName, additionalMetadata)
+	let resCode = values[0]
+	let resData = values[1]
+
+	// set a response
+	res.status(resCode).send(resData)
+});
 
 //server start
 app.listen(app.get('port'),() => {
