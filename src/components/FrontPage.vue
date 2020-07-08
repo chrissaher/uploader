@@ -7,21 +7,98 @@
         placeholder="Choose a file or drop it here..."
         drop-placeholder="Drop file here..."
       ></b-form-file>
-      <div class="mt-3">Selected file: {{ file ? file.name : '' }}</div>
+      <div class="mt-3">Selected file: {{ file ? file.name : "" }}</div>
+
+      <b-button @click="processFiles" class="mr-2">Upload</b-button>
     </b-card>
   </div>
 </template>
 
 <script>
+import { EventEmitter } from "events";
+
 export default {
   name: "FrontPage",
-  props: {
-  },
+  props: {},
   data() {
-      return {
-        file: null,
+    let types = {
+          TEXT: 'Text',
+          ARRAY_BUFFER: 'ArrayBuffer'
+      };
+
+    return {
+      file: null,
+      chunks: [],
+      options: {
+        type: types.ARRAY_BUFFER,
+        chunkSize: 1024 * 1024, //1MB
+      }
+    };
+  },
+  methods: {
+    processFiles() {
+      var eventEmiter = new EventEmitter();
+      let _this = this;
+
+      eventEmiter.on("data", function(data) {
+        _this.chunks.push(data);
+        console.log('chunk[' + _this.chunks.length + ']: ' + _this.roundBytesToKB(data.byteLength) + 'KB');
+      });
+
+      eventEmiter.on("end", function() {
+        //send request;
+        console.log('file size: ' + _this.roundBytesToKB(_this.file.size) + ' KB');
+        console.log('chunks number: ' + _this.chunks.length);
+        console.log('enviar request al servidor');
+      });
+
+      eventEmiter.on("error", function(error) {
+        console.log('errorsiño: ' + error);
+      });
+
+      this.splitFile(this.file, this.options, eventEmiter);
+    },
+
+    splitFile(file, options, emitter) {
+      if (options === undefined) options = {};
+      if (options.type === undefined) options.type = "Text";
+      if (options.chunkSize === undefined) options.chunkSize = 64000;
+
+      var offset = 0,
+        method = "readAs" + options.type; 
+
+      var onLoadHandler = function(evt) {
+        if (evt.target.error !== null) {
+          emitter.emit("error", evt.target.error);
+          return;
         }
+
+        var data = evt.target.result;
+
+        offset += options.chunkSize;
+        emitter.emit("data", data);
+        if (offset >= file.size) {
+          emitter.emit("end");
+        } else {
+          readChunk(offset, options.chunkSize, file);
+        }
+      };
+
+      var readChunk = function(_offset, length, _file) {
+        var r = new FileReader();
+        var blob = _file.slice(_offset, length + _offset);
+        r.onload = onLoadHandler;
+        r[method](blob);
+      };
+
+      readChunk(offset, options.chunkSize, file);
+
+      return emitter;
+    },
+    roundBytesToKB(number) {
+      return Math.round(( (number/1024) + Number.EPSILON) * 100) / 100;
     }
+  }
 };
 </script>
 
