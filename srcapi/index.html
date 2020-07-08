@@ -5,9 +5,17 @@
     <title>js eliminar luego</title>
   </head>
   <body>
-    <form class="/" action="/do-upload"  method="POST" enctype="multipart/form-data">
+    <!-- <form class="/" action="/createFile"  method="POST" enctype="multipart/form-data">
       <input type="file" name="upload"/>
       <input type="submit" value="Upload" />
+    </form> -->
+
+    <form action="/createFile"  method="POST">
+      <input type="text" name="hashId" placeholder="hashid"/>
+      <input type="text" name="fileName" placeholder="filename"/>
+      <input type="text" name="additionalMetadata" placeholder="additionalMetadata"/>
+      <input type="submit" value="Upload" />
     </form>
+
   </body>
 </html>
