@@ -14,7 +14,7 @@
   </div>
 </template>
 
-<script>
+<script>  
 import { EventEmitter } from "events";
 
 export default {
