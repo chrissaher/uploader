@@ -29,14 +29,22 @@ exports.update = (hashId, chunkId, position) => {
   var responseCode = 200;
   var responseData = "Updated correctly";
 
-  const filter = { hashId: hashId };
-  const update = { part1: chunkId};
 
-  FileMetadata.findOneAndUpdate(filter, update, function(err) {
-    responseCode = 500
-    responseData = err || "Error occurred while creating new file."
-    if(err) return [responseCode, responseData];
+  var query = FileMetadata.find({hashId: hashId});
+  query.exec(function (err, docs) {
+    if(err) {
+      responseCode = 500
+      responseData = err || "Not file with current hashId."
+      return [responseCode, responseData];
+    }
+    var filemetadata = docs[0];
+    FileMetadata.findByIdAndUpdate({filemetadata._id},{`part${position}`: chunkId}, function(err, result) {
+      if(err) {
+        responseCode = 500
+        responseData = err || "Can not update file."
+        return [responseCode, responseData];
+      }
+      return [responseCode, responseData];
+    })
   });
-
-  return [responseCode, responseData];
 }
