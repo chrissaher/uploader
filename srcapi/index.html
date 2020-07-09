@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>js eliminar luego</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <!-- <form class="/" action="/do-upload"  method="POST" enctype="multipart/form-data"> -->
+    <form method="POST" id="sendFile" enctype="multipart/form-data">
+      <input id="files" type="file" name="upload"/>
+      <input id="submit" type="submit" value="Upload" />
+    </form>
+
+    <!-- <form action="/createFile"  method="POST">
+      <input type="text" name="hashId" placeholder="hashid"/>
+      <input type="text" name="fileName" placeholder="filename"/>
+      <input type="text" name="additionalMetadata" placeholder="additionalMetadata"/>
+      <input type="submit" value="Upload" />
+    </form> -->
+
+  </body>
+  <script>
+      $(function() {
+
+         $("#submit").click(async function (event) {
+
+           event.preventDefault();
+
+           // get file as an arrayBuffer
+           var form = $('#sendFile')[0];
+           var file = $('#files')[0].files;
+           var arrayBuffer = await file[0].arrayBuffer();
+
+           function ab2str(buf) {
+             var bufView = new Uint8Array(buf)
+             return bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
+           }
+
+           // disabled the submit button
+           $("#btnSubmit").prop("disabled", true);
+
+           $.ajax({
+             type: "POST",
+             headers: {
+               'Content-Type': 'application/json'
+             },
+             url: "/saveChunk",
+             data: JSON.stringify({
+               "hashId": "0000001",
+               "position": 1,
+               "chunk": ab2str(arrayBuffer)
+             }),
+             success: function(data) {
+               console.log(data)
+               $("#btnSubmit").prop("disabled", false);
+             },
+             error: function(e) {
+               console.log("ERROR: ", e)
+               $("#btnSubmit").prop("disabled", false);
+             }
+           });
+         });
+      });
+  </script>
+</html>
