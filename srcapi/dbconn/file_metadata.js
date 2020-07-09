@@ -37,14 +37,14 @@ exports.update = (hashId, chunkId, position) => {
       responseData = err || "Not file with current hashId."
       return [responseCode, responseData];
     }
-    var filemetadata = docs[0];
-    FileMetadata.findByIdAndUpdate({filemetadata._id},{`part${position}`: chunkId}, function(err, result) {
-      if(err) {
-        responseCode = 500
-        responseData = err || "Can not update file."
-        return [responseCode, responseData];
-      }
-      return [responseCode, responseData];
-    })
+    // var filemetadata = docs[0];
+    // FileMetadata.findByIdAndUpdate({filemetadata._id},{`part${position}`: chunkId}, function(err, result) {
+    //   if(err) {
+    //     responseCode = 500
+    //     responseData = err || "Can not update file."
+    //     return [responseCode, responseData];
+    //   }
+    //   return [responseCode, responseData];
+    // })
   });
 }
