@@ -24,3 +24,19 @@ exports.create = (hashId, fileName, additionalMetadata) => {
   });
   return [responseCode, responseData];
 };
+
+exports.update = (hashId, chunkId, position) => {
+  var responseCode = 200;
+  var responseData = "Updated correctly";
+
+  const filter = { hashId: hashId };
+  const update = { part1: chunkId};
+
+  FileMetadata.findOneAndUpdate(filter, update, function(err) {
+    responseCode = 500
+    responseData = err || "Error occurred while creating new file."
+    if(err) return [responseCode, responseData];
+  });
+
+  return [responseCode, responseData];
+}
