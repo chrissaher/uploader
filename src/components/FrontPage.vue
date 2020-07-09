@@ -14,7 +14,7 @@
   </div>
 </template>
 
-<script>  
+<script>
 import { EventEmitter } from "events";
 
 export default {
@@ -41,6 +41,7 @@ export default {
       let _this = this;
 
       eventEmiter.on("data", function(data) {
+        // call api
         _this.chunks.push(data);
         console.log('chunk[' + _this.chunks.length + ']: ' + _this.roundBytesToKB(data.byteLength) + 'KB');
       });
@@ -56,7 +57,32 @@ export default {
         console.log('errorsiño: ' + error);
       });
 
-      this.splitFile(this.file, this.options, eventEmiter);
+
+      // call server api to insert a new row on file_metadata
+      var hashId = '0000001' // call md5 algorithm
+      var fileName = 'myfile.png' // get this from html component
+      var additionalMetadata = '' // can be changed later
+      var metadata = {
+        "hashId": hashId,
+        "fileName": fileName,
+        "additionalMetadata": additionalMetadata
+      }
+
+      $.ajax({
+        type: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/createFile",
+        data: JSON.stringify(metadata),
+        sucess: function(data) {
+          this.splitFile(this.file, this.options, eventEmiter);
+        },
+        error: function(e) {
+          console.log("ERROR: ", e)
+          // display error on html
+        }
+      });
     },
 
     splitFile(file, options, emitter) {
@@ -65,7 +91,7 @@ export default {
       if (options.chunkSize === undefined) options.chunkSize = 64000;
 
       var offset = 0,
-        method = "readAs" + options.type; 
+        method = "readAs" + options.type;
 
       var onLoadHandler = function(evt) {
         if (evt.target.error !== null) {
