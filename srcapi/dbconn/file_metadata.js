@@ -1,5 +1,5 @@
 // include related entities
-const FileMetadata = require("../models/file_metadata.js")
+const FileMetadata = require("../models/file_metadata")
 
 exports.create = (hashId, fileName, additionalMetadata) => {
   // define return varaibles
@@ -37,14 +37,32 @@ exports.update = (hashId, chunkId, position) => {
       responseData = err || "Not file with current hashId."
       return [responseCode, responseData];
     }
-    // var filemetadata = docs[0];
-    // FileMetadata.findByIdAndUpdate({filemetadata._id},{`part${position}`: chunkId}, function(err, result) {
-    //   if(err) {
-    //     responseCode = 500
-    //     responseData = err || "Can not update file."
-    //     return [responseCode, responseData];
-    //   }
-    //   return [responseCode, responseData];
-    // })
+
+    // fix update con file metadata
+    var filemetadata = docs[0];
+    FileMetadata.findByIdAndUpdate({filemetadata._id},{`part${position}`: chunkId}, function(err, result) {
+      if(err) {
+        responseCode = 500
+        responseData = err || "Can not update file."
+        return [responseCode, responseData];
+      }
+      return [responseCode, responseData];
+    })
   });
+}
+
+exports.findList = async function getList() {
+  var responseCode = 200;
+  var responseData = {};
+  const objList = await FileMetadata.find(function(err, docs){
+    if(err){
+    responseCode = 500
+    responseData = err || "Error occurred while getting the list."
+       return [responseCode, responseData];
+    }else {
+      return docs;
+    }
+  });
+  //console.log(objList)
+  return [responseCode, objList];
 }
