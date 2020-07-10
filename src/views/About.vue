@@ -1,5 +1,18 @@
 <template>
-  <div class="about">
-    <h1>The file list will be implemented here</h1>
+  <div class="home">
+    <img alt="Vue logo" src="../assets/logo.png" />
+    <ListPage />
   </div>
 </template>
+
+<script>
+// @ is an alias to /src
+import ListPage from "@/components/ListPage.vue";
+
+export default {
+  name: "About",
+  components: {
+    ListPage
+  }
+};
+</script>
