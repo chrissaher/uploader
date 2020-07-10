@@ -46,6 +46,10 @@ app.post('/saveChunk', async (req, res) => {
 	filemetadataController.update(req, res);
 });
 
+app.get('/getList', (req, res) =>{
+	filemetadata.findList();
+})
+
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
   var bufView = new Uint8Array(buf);
@@ -55,10 +59,11 @@ function str2ab(str) {
   return buf;
 }
 
-app.get('/getList', async (req, res) =>{
+/*app.get('/getList', async (req, res) =>{
 	const fileList = await filemetadataController.findList();
 	res.json(fileList);
-})
+})*/
+
 
 //server start
 app.listen(app.get('port'),() => {

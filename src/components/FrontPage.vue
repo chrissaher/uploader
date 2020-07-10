@@ -75,7 +75,7 @@ export default {
       let _this = this;
       var metadata = {
         fileHashId: this.fileHashId,
-        chunk: this.ab2str(data), 
+        chunk: this.ab2str(data),
         position: this.chunks.length
       };
       axios

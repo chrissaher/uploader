@@ -16,21 +16,28 @@ function str2ab(str) {
 exports.create = (req, res) => {
   let hashId = req.body.fileHashId
 	let fileName = req.body.fileName
-	let additionalMetadata = req.body.additionalMetadata || ''
+	let additionalMetadata = JSON.stringify(req.body.additionalMetadata || '')
   let currentDate = Date.now();
+  let empty = ''
 
   // create object to be inserted
   const fileMetadata = new FileMetadata({
     hashId: hashId,
     fileName: fileName,
     uploadDate: currentDate,
-    additionalMetadata: additionalMetadata
+    additionalMetadata: additionalMetadata,
+    part1: empty,
+    part2: empty,
+    part3: empty,
+    part4: empty,
+    part5: empty,
   });
   fileMetadata.save()
     .then(data => {
       res.send(data)
     })
     .catch(err => {
+      console.log("error here: ", err)
       res.status(500).send("error inserting metadata")
     })
 };
@@ -58,39 +65,39 @@ exports.update = (req, res) => {
         }
         var filemetadata = docs[0];
         var id = filemetadata["_id"];
-        var part = `part${position}`
-        FileMetadata.findByIdAndUpdate({_id: id},{part: chunkId}, { useFindAndModify: false })
+        var updateField;
+        switch(position) {
+          case 1: updateField={part1:chunkId};break;
+          case 2: updateField={part2:chunkId};break;
+          case 3: updateField={part3:chunkId};break;
+          case 4: updateField={part4:chunkId};break;
+          case 5: updateField={part5:chunkId};break;
+        }
+        FileMetadata.findByIdAndUpdate({_id: id},updateField, { useFindAndModify: false })
         .then(data => {
           if (!data) {
             res.status(500).send("error on update");
-          } else res.send("updated correctly");
+          } else {
+            res.send("updated correctly");
+          }
         })
         .catch(err => {
-          console.log("error at update");
-          console.log("err: ", err)
           res.status(500).send("error at update")
         })
       });
 
     })
     .catch(err => {
-      console.log("some error");
       res.status(500).send("unexpected at update")
     })
 };
 
-exports.findList = async function getList() {
-  var responseCode = 200;
-  var responseData = {};
-  const objList = await FileMetadata.find(function(err, docs){
-    if(err){
-    responseCode = 500
-    responseData = err || "Error occurred while getting the list."
-       return [responseCode, responseData];
-    }else {
-      return docs;
-    }
-  });
-  //console.log(objList)
-  return [responseCode, objList];
+exports.findList = function getList() {
+  FileMetadata.find()
+    .then(data => {
+      res.send(data)
+    })
+    .catch(err => {
+      res.status(500).send("error at listing files")
+    })
 };
