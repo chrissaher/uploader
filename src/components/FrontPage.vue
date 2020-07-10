@@ -45,10 +45,6 @@ export default {
       let _this = this;
       this.fileHashId = md5(this.ab2str(arrayBuffer));
 
-      //TODO: Delete this logs
-      console.log(this.ab2str(arrayBuffer))
-      console.log(md5(this.ab2str(arrayBuffer)))
-
       var metadata = {
         fileHashId: this.fileHashId,
         fileName: this.file.name,
@@ -122,7 +118,7 @@ export default {
       });
 
       var fileReader = new FileReader();
-      fileReader.onload = e => _this.onCreateFile(e.target.result); 
+      fileReader.onload = e => _this.onCreateFile(e.target.result);
       fileReader.readAsArrayBuffer(_this.file);
     },
 
