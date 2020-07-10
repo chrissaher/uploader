@@ -7,6 +7,11 @@ const router = express.Router();
 const app = express();
 
 
+app.use(express.static(__dirname + '/public'));
+
+console.log("dirname: ", __dirname)
+console.log("static: ", __dirname + '/public')
+
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
 
@@ -19,56 +24,31 @@ mongoose.connect('mongodb+srv://ayudinadm:REolfqEvHV8D3toF@ayudinfiles.pjgqg.mon
 const fileprueba = require('./models/fileup');
 
 // add reference to filemetadata
-const filemetadata = require('./dbconn/file_metadata.js')
-const chunkdata = require('./dbconn/chunk_data.js')
+const filemetadataController = require('./dbconn/file_metadata.js')
+const chunkdataController = require('./dbconn/chunk_data.js')
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Request-Headers");
+  res.header("Access-Control-Allow-Methods", "*");
+  next();
+});
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 })
 
 app.post('/createFile', (req, res) => {
-	// parse data from form
-	let hashId = req.body.hashId
-	let fileName = req.body.fileName
-	let additionalMetadata = req.body.additionalMetadata || ''
-
-	// try insert into db
-	var values = filemetadata.create(hashId, fileName, additionalMetadata)
-	let resCode = values[0]
-	let resData = values[1]
-
-	// set a response
-	res.status(resCode).send(resData)
+	filemetadataController.create(req,res)
 });
 
-app.post('/saveChunk', (req, res) => {
-	let hashId = req.body.hashId
-	let position = req.body.position
-	let chunk = req.body.chunk
-
-	let buffer = str2ab(chunk)
-	// get the checksum - already confirmed with other tools
-	let checksum = md5(Buffer.from(buffer))
-
-	// try insert into db
-	var values = chunkdata.create(checksum, chunk)
-	var resCode = values[0]
-	var resData = values[1]
-
-	if(resCode == 500) {
-		res.status(resCode).send(resData)
-		return
-	}
-
-	// try update the original file
-	values = fileMetadata.update(hashId, checksum, position)
-	resCode = values[0]
-	resData = values[1]
-
-	// set a response
-	res.status(resCode).send(resData)
+app.post('/saveChunk', async (req, res) => {
+	filemetadataController.update(req, res);
 });
+
+app.get('/getList', (req, res) =>{
+	filemetadata.findList();
+})
 
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
@@ -78,11 +58,6 @@ function str2ab(str) {
   }
   return buf;
 }
-
-app.get('/getList', async (req, res) =>{
-	const fileList = await filemetadata.findList();
-	res.json(fileList);
-})
 
 //server start
 app.listen(app.get('port'),() => {

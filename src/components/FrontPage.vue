@@ -55,11 +55,10 @@ export default {
       };
 
       axios
-        .post(process.env.VUE_APP_NODE_SERVER + "createFile", {
+        .post(process.env.VUE_APP_NODE_SERVER + "createFile",metadata, {
           headers: {
             "Content-Type": "application/json"
-          },
-          data: JSON.stringify(metadata)
+          }
         })
         .then(function() {
           _this.splitFile(_this.file, _this.options, _this.eventEmiter);
@@ -70,18 +69,16 @@ export default {
     },
     onSaveChunks(data) {
       let _this = this;
-
       var metadata = {
         fileHashId: this.fileHashId,
-        chunk: this.arrayBytesToString(data),
-        position: this.chunks.length - 1
+        chunk: this.ab2str(data),
+        position: this.chunks.length
       };
       axios
-        .post(process.env.VUE_APP_NODE_SERVER + "createFile", {
+        .post(process.env.VUE_APP_NODE_SERVER + "saveChunk",metadata, {
           headers: {
             "Content-Type": "application/json"
-          },
-          data: JSON.stringify(metadata)
+          }
         })
         .then(function() {
           console.log("Chunk uploaded on pos: " + _this.chunks.length - 1);
@@ -92,6 +89,7 @@ export default {
     },
     processFiles() {
       let _this = this;
+      _this.chunks = [];
 
       this.eventEmiter = new EventEmitter();
 
@@ -162,7 +160,8 @@ export default {
       return Math.round((number / 1024 + Number.EPSILON) * 100) / 100;
     },
     ab2str(buf) {
-      return String.fromCharCode.apply(null, new Uint16Array(buf));
+      var bufView = new Uint8Array(buf)
+      return bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
     }
   }
 };
