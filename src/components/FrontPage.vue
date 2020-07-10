@@ -70,13 +70,11 @@ export default {
     },
     onSaveChunks(data) {
       let _this = this;
-      console.log("check 1: ");
       var metadata = {
         fileHashId: this.fileHashId,
         chunk: this.ab2str(data), 
         position: this.chunks.length
       };
-      console.log("check 2: ");
       axios
         .post(process.env.VUE_APP_NODE_SERVER + "saveChunk", {
           headers: {
