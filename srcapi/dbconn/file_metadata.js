@@ -92,10 +92,10 @@ exports.update = (req, res) => {
     })
 };
 
-exports.findList = function getList() {
+exports.findList = (req, res) => {
   FileMetadata.find()
     .then(data => {
-      res.send(data)
+      res.json(data)
     })
     .catch(err => {
       res.status(500).send("error at listing files")

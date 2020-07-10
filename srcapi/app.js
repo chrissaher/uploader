@@ -47,7 +47,7 @@ app.post('/saveChunk', async (req, res) => {
 });
 
 app.get('/getList', (req, res) =>{
-	filemetadata.findList();
+	filemetadataController.findList(req, res);
 })
 
 function str2ab(str) {
