@@ -39,12 +39,16 @@ app.post('/createFile', (req, res) => {
 	filemetadataController.create(req,res)
 });
 
-app.post('/saveChunk', async (req, res) => {
+app.post('/saveChunk', (req, res) => {
 	res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Request-Headers");
   res.header("Access-Control-Allow-Methods", "*");
 	filemetadataController.update(req, res);
 });
+
+app.get('/getList', (req, res) =>{
+	filemetadata.findList();
+})
 
 function str2ab(str) {
   var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
@@ -54,11 +58,6 @@ function str2ab(str) {
   }
   return buf;
 }
-
-app.get('/getList', async (req, res) =>{
-	const fileList = await filemetadata.findList();
-	res.json(fileList);
-})
 
 //server start
 app.listen(app.get('port'),() => {

@@ -79,18 +79,12 @@ exports.update = (req, res) => {
     })
 };
 
-exports.findList = async function getList() {
-  var responseCode = 200;
-  var responseData = {};
-  const objList = await FileMetadata.find(function(err, docs){
-    if(err){
-    responseCode = 500
-    responseData = err || "Error occurred while getting the list."
-       return [responseCode, responseData];
-    }else {
-      return docs;
-    }
-  });
-  //console.log(objList)
-  return [responseCode, objList];
+exports.findList = function getList() {
+  FileMetadata.find()
+    .then(data => {
+      res.send(data)
+    })
+    .catch(err => {
+      res.status(500).send("error at listing files")
+    })
 };
