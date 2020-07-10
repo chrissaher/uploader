@@ -41,9 +41,13 @@ export default {
     };
   },
   methods: {
-    onCreateFile() {
+    onCreateFile(arrayBuffer) {
       let _this = this;
-      this.fileHashId = md5(this.ab2str(_this.file));
+      this.fileHashId = md5(this.ab2str(arrayBuffer));
+
+      //TODO: Delete this logs
+      console.log(this.ab2str(arrayBuffer))
+      console.log(md5(this.ab2str(arrayBuffer)))
 
       var metadata = {
         fileHashId: this.fileHashId,
@@ -89,6 +93,7 @@ export default {
     },
     processFiles() {
       let _this = this;
+      this.chunks = [];
 
       this.eventEmiter = new EventEmitter();
 
@@ -116,7 +121,9 @@ export default {
         console.log("errorsiño: " + error);
       });
 
-      this.onCreateFile();
+      var fileReader = new FileReader();
+      fileReader.onload = e => _this.onCreateFile(e.target.result); 
+      fileReader.readAsArrayBuffer(_this.file);
     },
 
     splitFile(file, options, emitter) {
@@ -159,8 +166,9 @@ export default {
       return Math.round((number / 1024 + Number.EPSILON) * 100) / 100;
     },
     ab2str(buf) {
-      var bufView = new Uint8Array(buf)
-      return bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
+      var bufView = new Uint8Array(buf);
+      var buffer2 = bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
+      return buffer2;
     }
   }
 };

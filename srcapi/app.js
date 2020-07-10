@@ -56,7 +56,7 @@ function str2ab(str) {
 }
 
 app.get('/getList', async (req, res) =>{
-	const fileList = await filemetadata.findList();
+	const fileList = await filemetadataController.findList();
 	res.json(fileList);
 })
 
