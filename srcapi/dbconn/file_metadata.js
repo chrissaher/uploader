@@ -14,7 +14,7 @@ function str2ab(str) {
 }
 
 exports.create = (req, res) => {
-  let hashId = req.body.hashId
+  let hashId = req.body.fileHashId
 	let fileName = req.body.fileName
 	let additionalMetadata = req.body.additionalMetadata || ''
   let currentDate = Date.now();
@@ -36,7 +36,7 @@ exports.create = (req, res) => {
 };
 
 exports.update = (req, res) => {
-  let hashId = req.body.hashId
+  let hashId = req.body.fileHashId
 	let position = req.body.position
 	let chunk = req.body.chunk
   let buffer = str2ab(chunk)

@@ -55,11 +55,10 @@ export default {
       };
 
       axios
-        .post(process.env.VUE_APP_NODE_SERVER + "createFile", {
+        .post(process.env.VUE_APP_NODE_SERVER + "createFile",metadata, {
           headers: {
             "Content-Type": "application/json"
-          },
-          data: JSON.stringify(metadata)
+          }
         })
         .then(function() {
           _this.splitFile(_this.file, _this.options, _this.eventEmiter);
@@ -76,11 +75,10 @@ export default {
         position: this.chunks.length
       };
       axios
-        .post(process.env.VUE_APP_NODE_SERVER + "saveChunk", {
+        .post(process.env.VUE_APP_NODE_SERVER + "saveChunk",metadata, {
           headers: {
             "Content-Type": "application/json"
-          },
-          data: JSON.stringify(metadata)
+          }
         })
         .then(function() {
           console.log("Chunk uploaded on pos: " + _this.chunks.length - 1);
