@@ -89,6 +89,7 @@ export default {
     },
     processFiles() {
       let _this = this;
+      _this.chunks = [];
 
       this.eventEmiter = new EventEmitter();
 
