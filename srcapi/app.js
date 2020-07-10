@@ -33,10 +33,16 @@ app.get('/', (req, res) => {
 })
 
 app.post('/createFile', (req, res) => {
+	res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Request-Headers");
+  res.header("Access-Control-Allow-Methods", "*");
 	filemetadataController.create(req,res)
 });
 
 app.post('/saveChunk', async (req, res) => {
+	res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Origin, Access-Control-Allow-Methods, Access-Control-Request-Headers");
+  res.header("Access-Control-Allow-Methods", "*");
 	filemetadataController.update(req, res);
 });
 

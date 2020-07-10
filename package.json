@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node srcapi/app.js",
+    "start": "vue-cli-service serve & node srcapi/app.js",
     "dev": "nodemon srcapi/app.js",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",

@@ -57,9 +57,6 @@ export default {
       axios
         .post(process.env.VUE_APP_NODE_SERVER + "createFile", {
           headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "*",
-            "Access-Control-Allow-Methods": "*",
             "Content-Type": "application/json"
           },
           data: JSON.stringify(metadata)
@@ -82,9 +79,6 @@ export default {
       axios
         .post(process.env.VUE_APP_NODE_SERVER + "saveChunk", {
           headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "*",
-            "Access-Control-Allow-Methods": "*",
             "Content-Type": "application/json"
           },
           data: JSON.stringify(metadata)
