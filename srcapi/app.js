@@ -59,6 +59,12 @@ function str2ab(str) {
   return buf;
 }
 
+/*app.get('/getList', async (req, res) =>{
+	const fileList = await filemetadataController.findList();
+	res.json(fileList);
+})*/
+
+
 //server start
 app.listen(app.get('port'),() => {
 	console.log(`Escucho en el puerto  ${app.get('port')}`);
