@@ -103,5 +103,5 @@ exports.findList = (req, res) => {
 };
 
 exports.getByHashId = (req, res) => {
-  res.send("todo")
+  res.send("to do")
 }
