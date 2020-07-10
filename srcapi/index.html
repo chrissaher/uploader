@@ -36,6 +36,8 @@
            // get file as an arrayBuffer
            var form = $('#sendFile')[0];
            var file = $('#files')[0].files[0];
+           console.log(file);
+           console.log(file.length);
            var fileName = file.name;
            var arrayBuffer = await file.arrayBuffer();
            var strBuffer = ab2str(arrayBuffer);
