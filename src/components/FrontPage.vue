@@ -70,12 +70,13 @@ export default {
     },
     onSaveChunks(data) {
       let _this = this;
-
+      console.log("check 1: ");
       var metadata = {
         fileHashId: this.fileHashId,
-        chunk: this.arrayBytesToString(data),
+        chunk: this.ab2str(data), 
         position: this.chunks.length
       };
+      console.log("check 2: ");
       axios
         .post(process.env.VUE_APP_NODE_SERVER + "saveChunk", {
           headers: {
@@ -162,7 +163,8 @@ export default {
       return Math.round((number / 1024 + Number.EPSILON) * 100) / 100;
     },
     ab2str(buf) {
-      return String.fromCharCode.apply(null, new Uint16Array(buf));
+      var bufView = new Uint8Array(buf)
+      return bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
     }
   }
 };
