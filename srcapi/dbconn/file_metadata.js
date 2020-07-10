@@ -101,3 +101,7 @@ exports.findList = (req, res) => {
       res.status(500).send("error at listing files")
     })
 };
+
+exports.getByHashId = (req, res) => {
+  res.send("todo")
+}
