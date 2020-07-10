@@ -1,11 +1,22 @@
+const md5 = require('js-md5');
+
 // include related entities
 const FileMetadata = require("../models/file_metadata")
+const ChunkData = require("../models/chunk_data.js")
 
-exports.create = (hashId, fileName, additionalMetadata) => {
-  // define return varaibles
-  var responseCode = 200;
-  var responseData = "Inserted correctly";
-  // get current date
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+  var bufView = new Uint8Array(buf);
+  for (var i=0, strLen=str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
+exports.create = (req, res) => {
+  let hashId = req.body.hashId
+	let fileName = req.body.fileName
+	let additionalMetadata = req.body.additionalMetadata || ''
   let currentDate = Date.now();
 
   // create object to be inserted
@@ -15,41 +26,58 @@ exports.create = (hashId, fileName, additionalMetadata) => {
     uploadDate: currentDate,
     additionalMetadata: additionalMetadata
   });
-
-  // save the object in bd
-  fileMetadata.save(function(err) {
-    responseCode = 500
-    responseData = err || "Error occurred while creating new file."
-    if(err) return [responseCode, responseData];
-  });
-  return [responseCode, responseData];
+  fileMetadata.save()
+    .then(data => {
+      res.send(data)
+    })
+    .catch(err => {
+      res.status(500).send("error inserting metadata")
+    })
 };
 
-exports.update = (hashId, chunkId, position) => {
-  var responseCode = 200;
-  var responseData = "Updated correctly";
+exports.update = (req, res) => {
+  let hashId = req.body.hashId
+	let position = req.body.position
+	let chunk = req.body.chunk
+  let buffer = str2ab(chunk)
+	let chunkId = md5(Buffer.from(buffer))
 
-
-  var query = FileMetadata.find({hashId: hashId});
-  query.exec(function (err, docs) {
-    if(err) {
-      responseCode = 500
-      responseData = err || "Not file with current hashId."
-      return [responseCode, responseData];
-    }
-
-    // fix update con file metadata
-    var filemetadata = docs[0];
-    FileMetadata.findByIdAndUpdate({filemetadata._id},{`part${position}`: chunkId}, function(err, result) {
-      if(err) {
-        responseCode = 500
-        responseData = err || "Can not update file."
-        return [responseCode, responseData];
-      }
-      return [responseCode, responseData];
-    })
+  // First we insert the new chunk
+  const chunkData = new ChunkData({
+    chunkId: chunkId,
+    chunkContent: chunk,
   });
-}
+
+  chunkData.save()
+    .then(data => {
+      var query = FileMetadata.find({hashId: hashId})
+      query.exec(function(err, docs) {
+        if(err) {
+          console.log("error at find");
+          res.status(500).send("error at find")
+        }
+        var filemetadata = docs[0];
+        var id = filemetadata["_id"];
+        var part = `part${position}`
+        FileMetadata.findByIdAndUpdate({_id: id},{part: chunkId}, { useFindAndModify: false })
+        .then(data => {
+          if (!data) {
+            res.status(500).send("error on update");
+          } else res.send("updated correctly");
+        })
+        .catch(err => {
+          console.log("error at update");
+          console.log("err: ", err)
+          res.status(500).send("error at update")
+        })
+      });
+
+    })
+    .catch(err => {
+      console.log("some error");
+      res.status(500).send("unexpected at update")
+    })
+};
 
 exports.findList = async function getList() {
   var responseCode = 200;
@@ -65,4 +93,4 @@ exports.findList = async function getList() {
   });
   //console.log(objList)
   return [responseCode, objList];
-}
+};

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>js eliminar luego</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="md5.js"></script>
   </head>
   <body>
     <!-- <form class="/" action="/do-upload"  method="POST" enctype="multipart/form-data"> -->
@@ -27,32 +28,59 @@
 
            event.preventDefault();
 
-           // get file as an arrayBuffer
-           var form = $('#sendFile')[0];
-           var file = $('#files')[0].files;
-           var arrayBuffer = await file[0].arrayBuffer();
-
            function ab2str(buf) {
              var bufView = new Uint8Array(buf)
              return bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
            }
 
+           // get file as an arrayBuffer
+           var form = $('#sendFile')[0];
+           var file = $('#files')[0].files[0];
+           var fileName = file.name;
+           var arrayBuffer = await file.arrayBuffer();
+           var strBuffer = ab2str(arrayBuffer);
+           var hashId = md5(strBuffer);
+           var additionalMetadata = "";
+
            // disabled the submit button
            $("#btnSubmit").prop("disabled", true);
+
 
            $.ajax({
              type: "POST",
              headers: {
                'Content-Type': 'application/json'
              },
-             url: "/saveChunk",
+             url: "/createFile",
              data: JSON.stringify({
-               "hashId": "0000001",
-               "position": 1,
-               "chunk": ab2str(arrayBuffer)
+               "hashId": hashId,
+               "fileName": fileName,
+               "additionalMetadata": additionalMetadata
              }),
              success: function(data) {
-               console.log(data)
+               console.log("saving chunks ...")
+               // second call for chunks
+               $.ajax({
+                 type: "POST",
+                 headers: {
+                   'Content-Type': 'application/json'
+                 },
+                 url: "/saveChunk",
+                 data: JSON.stringify({
+                   "hashId": hashId,
+                   "position": 2,
+                   "chunk": strBuffer
+                 }),
+                 success: function(data) {
+                   console.log(data)
+                   console.log("data uploaded successfully")
+                   $("#btnSubmit").prop("disabled", false);
+                 },
+                 error: function(e) {
+                   console.log("ERROR: ", e)
+                   $("#btnSubmit").prop("disabled", false);
+                 }
+               })
                $("#btnSubmit").prop("disabled", false);
              },
              error: function(e) {
@@ -60,6 +88,27 @@
                $("#btnSubmit").prop("disabled", false);
              }
            });
+
+           // $.ajax({
+           //   type: "POST",
+           //   headers: {
+           //     'Content-Type': 'application/json'
+           //   },
+           //   url: "/saveChunk",
+           //   data: JSON.stringify({
+           //     "hashId": "0000001",
+           //     "position": 1,
+           //     "chunk": strBuffer
+           //   }),
+           //   success: function(data) {
+           //     console.log(data)
+           //     $("#btnSubmit").prop("disabled", false);
+           //   },
+           //   error: function(e) {
+           //     console.log("ERROR: ", e)
+           //     $("#btnSubmit").prop("disabled", false);
+           //   }
+           // });
          });
       });
   </script>
