@@ -50,8 +50,7 @@ app.get('/getList', (req, res) =>{
 	filemetadataController.findList(req, res);
 })
 
-
-app.get('/getFile', (req, res) =>{
+app.post('/getFile', (req, res) =>{
 	filemetadataController.getByHashId(req, res);
 })
 

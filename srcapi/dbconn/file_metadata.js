@@ -1,4 +1,5 @@
 const md5 = require('js-md5');
+const fs = require('fs')
 
 // include related entities
 const FileMetadata = require("../models/file_metadata")
@@ -13,10 +14,23 @@ function str2ab(str) {
   return buf;
 }
 
+function ab2str(buf) {
+  // return String.fromCharCode.apply(null, new Uint8Array(buf));
+  var bufView = new Uint8Array(buf)
+  return bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
+}
+
+function appendBuffer(buffer1, buffer2) {
+  var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+  tmp.set(new Uint8Array(buffer1), 0);
+  tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+  return tmp;
+};
+
 exports.create = (req, res) => {
   let hashId = req.body.fileHashId
-	let fileName = req.body.fileName
-	let additionalMetadata = JSON.stringify(req.body.additionalMetadata || '')
+  let fileName = req.body.fileName
+  let additionalMetadata = JSON.stringify(req.body.additionalMetadata || '')
   let currentDate = Date.now();
   let empty = ''
 
@@ -44,10 +58,10 @@ exports.create = (req, res) => {
 
 exports.update = (req, res) => {
   let hashId = req.body.fileHashId
-	let position = req.body.position
-	let chunk = req.body.chunk
+  let position = req.body.position
+  let chunk = req.body.chunk
   let buffer = str2ab(chunk)
-	let chunkId = md5(Buffer.from(buffer))
+  let chunkId = md5(Buffer.from(buffer))
 
   // First we insert the new chunk
   const chunkData = new ChunkData({
@@ -102,6 +116,40 @@ exports.findList = (req, res) => {
     })
 };
 
-exports.getByHashId = (req, res) => {
-  res.send("to do")
-}
+exports.getByHashId = async (req, res) => {
+  let hashId = req.body.fileHashId
+  var filequery = FileMetadata.find({hashId: hashId})
+  filequery.exec(function(err, docs) {
+    if(err) {
+      console.log("error at find with hashId: ", hashId)
+      res.status(500).send("error at find")
+    }
+    var filemetadata = docs[0]
+    let filename = filemetadata['fileName']
+    let chunks = [filemetadata['part1'],
+                  filemetadata['part2'],
+                  filemetadata['part3'],
+                  filemetadata['part4'],
+                  filemetadata['part5']]
+
+    ChunkData.find({chunkId: chunks})
+    .then(data => {
+        let len = data.length
+        var ids = [null, null, null, null, null]
+        var buffers = [null, null, null, null, null]
+        for(var i = 0; i < len; ++i ) {
+            let chunkid = data[i]["chunkId"]
+            let chunkdata = str2ab(data[i]["chunkContent"])
+            let index = chunks.indexOf(chunkid)
+            ids[index] = chunkid
+            buffers[index] = chunkdata
+        }
+        var fileBuffer = buffers[0];
+        for(var i = 1; i < len; ++i) fileBuffer = appendBuffer(fileBuffer, buffers[i]);
+        res.send(ab2str(fileBuffer))
+    })
+    .catch(err => {
+        res.status(500).send("error chunk query")
+    })
+  })
+};
