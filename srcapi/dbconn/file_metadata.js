@@ -118,8 +118,6 @@ exports.findList = (req, res) => {
 
 exports.getByHashId = async (req, res) => {
   let hashId = req.body.fileHashId
-  console.log("hashid: ", hashId)
-  // let hashId = "0d2e47b13385127f21503c481bd57197" // "4114b20e819a226df082e56ce1adc064"
   var filequery = FileMetadata.find({hashId: hashId})
   filequery.exec(function(err, docs) {
     if(err) {
