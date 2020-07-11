@@ -7,7 +7,7 @@
             <template v-slot:cell(options)="data">
             <b-button
                 size="sm"
-                @click="downloadItem(data, data.id, $event.target)"
+                @click="downloadItem(data.item.hashId, data.item.fileName)"
                 class="mr-1"
             >
                 <b-icon-download></b-icon-download>
@@ -51,16 +51,47 @@ export default {
             .get(process.env.VUE_APP_NODE_SERVER + "getList")
             .then(response => {
                 this.items = response.data;
-            console.log(this.items);
+                console.log(this.items);
             })
             .catch(error => {
             this.response = error.message;
             console.log(error.message);
             });
       },
-      downloadItem() {
+      downloadItem(hashid, filename) {
 
+
+      console.log("hashid: ", hashid)
+      var metadata = {
+        fileHashId: hashid,
+      };
+
+      function str2ab(str) {
+        var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+        var bufView = new Uint8Array(buf);
+        for (var i=0, strLen=str.length; i < strLen; i++) {
+          bufView[i] = str.charCodeAt(i);
+        }
+        return bufView;
       }
-  }     
+
+      axios
+          .post(process.env.VUE_APP_NODE_SERVER + "getFile", metadata)
+          .then(response => {
+              let abuffer = str2ab(response.data)
+              let blob = new Blob([abuffer]);
+              const url = window.URL.createObjectURL(blob)
+              const link = document.createElement('a')
+              link.href = url
+              link.setAttribute('download', filename) //or any other extension
+              document.body.appendChild(link)
+              link.click()
+          })
+          .catch(error => {
+          this.response = error.message;
+          console.log(error.message);
+          });
+      }
+  }
 };
 </script>
