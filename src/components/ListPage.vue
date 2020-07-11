@@ -1,6 +1,9 @@
 <template>
     <div class="container">
         <b-table show-empty small stacked="sm" :items="items" :fields="fields">
+            <template v-slot:cell(uploadDate)="date">
+                {{ date.item.uploadDate | moment('DD/MM/YYYY hh:mm:ss') }}
+            </template>
             <template v-slot:cell(options)="data">
             <b-button
                 size="sm"
@@ -31,9 +34,7 @@ export default {
           key: "uploadDate",
           label: "Upload Date",
           sortable: true,
-          sortDirection: "desc",
-          formatter: "formatISOString"
-
+          sortDirection: "desc"
         },
         { key: "options", label: "Options" }
       ],
@@ -58,6 +59,7 @@ export default {
             });
       },
       downloadItem(hashid, filename) {
+
 
       console.log("hashid: ", hashid)
       var metadata = {
@@ -89,37 +91,7 @@ export default {
           this.response = error.message;
           console.log(error.message);
           });
-      },
-      formatISOString(isoString) {
-      var result;
-      var date = new Date(isoString);
-      var year = date.getFullYear();
-      var month = date.getMonth() + 1;
-      var dt = date.getDate();
-      var hour = date.getHours();
-      var min = date.getMinutes();
-      var sec = date.getSeconds();
-
-      if (dt < 10) {
-        dt = "0" + dt;
       }
-      if (month < 10) {
-        month = "0" + month;
-      }
-      if (hour < 10) {
-        hour = "0" + hour;
-      }
-      if (min < 10) {
-        min = "0" + min;
-      }
-      if (sec < 10) {
-        sec = "0" + sec;
-      }
-      result =
-        dt + "/" + month + "/" + year + " " + hour + ":" + min + ":" + sec;
-      return result;
-    }
   }
-
 };
 </script>
