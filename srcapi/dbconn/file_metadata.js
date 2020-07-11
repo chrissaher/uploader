@@ -14,6 +14,12 @@ function str2ab(str) {
   return buf;
 }
 
+function ab2str(buf) {
+  // return String.fromCharCode.apply(null, new Uint8Array(buf));
+  var bufView = new Uint8Array(buf)
+  return bufView.reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), '');
+}
+
 function appendBuffer(buffer1, buffer2) {
   var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
   tmp.set(new Uint8Array(buffer1), 0);
@@ -111,8 +117,9 @@ exports.findList = (req, res) => {
 };
 
 exports.getByHashId = async (req, res) => {
-  // let hashId = req.body.fileHashId
-  let hashId = "4114b20e819a226df082e56ce1adc064"
+  let hashId = req.body.fileHashId
+  console.log("hashid: ", hashId)
+  // let hashId = "0d2e47b13385127f21503c481bd57197" // "4114b20e819a226df082e56ce1adc064"
   var filequery = FileMetadata.find({hashId: hashId})
   filequery.exec(function(err, docs) {
     if(err) {
@@ -120,6 +127,7 @@ exports.getByHashId = async (req, res) => {
       res.status(500).send("error at find")
     }
     var filemetadata = docs[0]
+    let filename = filemetadata['fileName']
     let chunks = [filemetadata['part1'],
                   filemetadata['part2'],
                   filemetadata['part3'],
@@ -131,7 +139,6 @@ exports.getByHashId = async (req, res) => {
         let len = data.length
         var ids = [null, null, null, null, null]
         var buffers = [null, null, null, null, null]
-        console.log("len: ", len)
         for(var i = 0; i < len; ++i ) {
             let chunkid = data[i]["chunkId"]
             let chunkdata = str2ab(data[i]["chunkContent"])
@@ -141,14 +148,7 @@ exports.getByHashId = async (req, res) => {
         }
         var fileBuffer = buffers[0];
         for(var i = 1; i < len; ++i) fileBuffer = appendBuffer(fileBuffer, buffers[i]);
-        // fs.appendFile("technicalReport.pdf", Buffer.from(fileBuffer), function (err) {
-        //     if (err) {
-        //       console.log("error")
-        //     } else {
-        //       console.log("saved")
-        //     }
-        // });
-        res.json(JSON.stringify(ids))
+        res.send(ab2str(fileBuffer))
     })
     .catch(err => {
         res.status(500).send("error chunk query")
