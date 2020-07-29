@@ -45,6 +45,7 @@ exports.create = (req, res) => {
     part3: empty,
     part4: empty,
     part5: empty,
+    userId: req.user.id
   });
   fileMetadata.save()
     .then(data => {
@@ -107,7 +108,7 @@ exports.update = (req, res) => {
 };
 
 exports.findList = (req, res) => {
-  FileMetadata.find()
+  FileMetadata.find({userId: req.user.id})
     .then(data => {
       res.json(data)
     })

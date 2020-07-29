@@ -19,6 +19,7 @@
 import { EventEmitter } from "events";
 import axios from "axios";
 import md5 from "js-md5";
+import store from "@/store";
 
 export default {
   name: "FrontPage",
@@ -54,12 +55,13 @@ export default {
         }
       };
 
+      const config = {
+        headers: { Authorization: `Bearer ${store.getters.userToken}`,
+        "Content-Type": "application/json" }
+      };
+
       axios
-        .post(process.env.VUE_APP_NODE_SERVER + "createFile",metadata, {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
+        .post(process.env.VUE_APP_NODE_SERVER + "createFile",metadata, config)
         .then(function() {
           _this.splitFile(_this.file, _this.options, _this.eventEmiter);
         })
@@ -74,12 +76,14 @@ export default {
         chunk: this.ab2str(data),
         position: this.chunks.length
       };
+
+      const config = {
+        headers: { Authorization: `Bearer ${store.getters.userToken}`,
+            "Content-Type": "application/json" }
+      };
+
       axios
-        .post(process.env.VUE_APP_NODE_SERVER + "saveChunk",metadata, {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        })
+        .post(process.env.VUE_APP_NODE_SERVER + "saveChunk",metadata, config)
         .then(function() {
           console.log("Chunk uploaded on pos: " + _this.chunks.length - 1);
         })

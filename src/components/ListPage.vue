@@ -18,6 +18,7 @@
 </template>
 <script>
 import axios from "axios";
+import store from "@/store";
 
 export default {
     name: "ListPage",
@@ -47,8 +48,13 @@ export default {
   methods: {
       getList() {
         console.log("sending request: getList");
+        
+        const config = {
+          headers: { Authorization: `Bearer ${store.getters.userToken}` }
+        };
+
         axios
-            .get(process.env.VUE_APP_NODE_SERVER + "getList")
+            .get(process.env.VUE_APP_NODE_SERVER + "getList", config)
             .then(response => {
                 this.items = response.data;
                 console.log(this.items);
@@ -75,8 +81,12 @@ export default {
         return bufView;
       }
 
+      const config = {
+        headers: { Authorization: `Bearer ${store.getters.userToken}` }
+      };
+
       axios
-          .post(process.env.VUE_APP_NODE_SERVER + "getFile", metadata)
+          .post(process.env.VUE_APP_NODE_SERVER + "getFile", metadata, config)
           .then(response => {
               let abuffer = str2ab(response.data)
               let blob = new Blob([abuffer]);
