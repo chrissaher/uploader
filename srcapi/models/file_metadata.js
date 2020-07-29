@@ -10,7 +10,8 @@ const FileMetadata = new Schema({
   part2: String,
   part3: String,
   part4: String,
-  part5: String
+  part5: String,
+  userId: String
 });
 
 module.exports = mongoose.model('FileMetadata',FileMetadata);
